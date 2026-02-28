@@ -13,8 +13,19 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+let app, db, auth;
+
+try {
+    // Only initialize if we have the critical apiKey, otherwise Vercel Serverless boots will fatally crash
+    if (process.env.FIREBASE_API_KEY) {
+        app = initializeApp(firebaseConfig);
+        db = getDatabase(app);
+        auth = getAuth(app);
+    } else {
+        console.warn("Firebase warning: FIREBASE_API_KEY is undefined. Firebase is not initialized.");
+    }
+} catch (error) {
+    console.error("Firebase Initialization Error:", error);
+}
 
 module.exports = { app, db, auth };
