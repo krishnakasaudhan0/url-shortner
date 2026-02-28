@@ -13,6 +13,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+
+
+console.log("API:", process.env.FIREBASE_API_KEY);
+console.log("JWT:", process.env.JWT_SECRET);
 // Route Middlewares
 app.use("/", authRoutes);
 app.use("/", urlRoutes);
