@@ -69,7 +69,7 @@
                 <p class="text-xl text-gray-700">Create your account.</p>
             </div>
     
-            <form action="/signup" method="POST" class="space-y-6">
+            <form id="signupForm" class="space-y-6">
                 <div>
                     <label class="block text-xl text-black mb-2">Display Name</label>
                     <input 
@@ -104,6 +104,7 @@
                 </div>
     
                 <button 
+                    id="submitBtn"
                     type="submit"
                     class="w-full mt-6 py-4 rounded-xl bg-[#118AB2] border-4 border-black text-white text-2xl tracking-wide shadow-[6px_6px_0_0_#000] hover:shadow-none hover:translate-y-[6px] hover:translate-x-[6px] transition-all"
                 >
@@ -129,7 +130,7 @@
     <!-- Firebase SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
       
         const firebaseConfig = {
             apiKey: "AIzaSyBCxi8VQRgRRWVsqcJr63yRvko-kK0WSd4",
@@ -145,22 +146,55 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        document.getElementById('googleSignupBtn').addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-            .then((result) => {
-                result.user.getIdToken().then(idToken => {
-                    fetch('/auth/google', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: idToken })
-                    })
-                    .then(response => {
-                        if (response.ok) window.location.href = '/';
-                        else console.error('Backend Google Auth Failed');
-                    });
+        const handleBackendAuth = async (endpoint, payload) => {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-            })
-            .catch((error) => console.error("Google Signup Error:", error));
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    alert(data.error || "Authentication failed.");
+                }
+            } catch (err) {
+                alert("Server error verifying authentication.");
+            }
+        };
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = e.target.name.value;
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Creating Account...";
+            submitBtn.disabled = true;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const idToken = await userCredential.user.getIdToken();
+                await handleBackendAuth('/signup', { idToken, name });
+            } catch (error) {
+                console.error("Firebase Signup Error:", error);
+                alert("Signup Error: " + error.message);
+            } finally {
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const idToken = await result.user.getIdToken();
+                await handleBackendAuth('/auth/google', { idToken });
+            } catch (error) {
+                console.error("Google Signup Error:", error);
+            }
         });
     </script>
 </body>

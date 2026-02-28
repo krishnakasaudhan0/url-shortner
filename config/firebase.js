@@ -1,6 +1,6 @@
 const { initializeApp } = require("firebase/app");
 const { getDatabase } = require("firebase/database");
-const { getAuth } = require("firebase/auth");
+const admin = require("firebase-admin");
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -13,19 +13,39 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-let app, db, auth;
+let app, db, adminAuth;
 
 try {
-    // Only initialize if we have the critical apiKey, otherwise Vercel Serverless boots will fatally crash
     if (process.env.FIREBASE_API_KEY) {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
-        auth = getAuth(app);
     } else {
-        console.warn("Firebase warning: FIREBASE_API_KEY is undefined. Firebase is not initialized.");
+        console.warn("Firebase Mod warning: FIREBASE_API_KEY missing.");
     }
 } catch (error) {
-    console.error("Firebase Initialization Error:", error);
+    console.error("Firebase Modular Init Error:", error);
 }
 
-module.exports = { app, db, auth };
+try {
+    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+        
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: privateKey,
+            }),
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+        adminAuth = admin.auth();
+    } else {
+        console.warn("Firebase Admin warning: Missing Admin Env Vars.");
+    }
+} catch (error) {
+    if (!/already exists/.test(error.message)) {
+         console.error("Firebase Admin Init Error:", error);
+    }
+}
+
+module.exports = { app, db, adminAuth };

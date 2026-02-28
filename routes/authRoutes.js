@@ -2,20 +2,18 @@ const express = require("express");
 const router = express.Router();
 const {
     renderSignup,
-    handleSignup,
     renderLogin,
-    handleLogin,
-    handleGoogleLogin,
+    handleTokenAuth,
     handleLogout
 } = require("../controllers/authController");
 
 router.get("/signup", renderSignup);
-router.post("/signup", handleSignup);
+router.post("/signup", handleTokenAuth);
 
 router.get("/login", renderLogin);
-router.post("/login", handleLogin);
+router.post("/login", handleTokenAuth);
 
-router.post("/auth/google", handleGoogleLogin);
+router.post("/auth/google", handleTokenAuth);
 
 router.get("/logout", handleLogout);
 
