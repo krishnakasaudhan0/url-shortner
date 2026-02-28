@@ -28,8 +28,15 @@ try {
 
 try {
     if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+        // Bulletproof Vercel newline parsing: handles both literal '\n' and actual escaped '\\n' strings
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        if (privateKey.includes('\\n')) {
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        } else if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+            privateKey = JSON.parse(privateKey);
+        }
         
+        console.log(`[Firebase Admin] Initializing for Project: ${process.env.FIREBASE_PROJECT_ID}`);
         admin.initializeApp({
             credential: admin.credential.cert({
                 projectId: process.env.FIREBASE_PROJECT_ID,

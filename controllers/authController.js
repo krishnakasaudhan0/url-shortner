@@ -11,11 +11,15 @@ const handleTokenAuth = async (req, res) => {
         const { idToken, name } = req.body;
         
         if (!idToken) {
+            console.error("[Auth] Blank idToken received in body");
             return res.status(401).json({ success: false, error: "No ID token provided." });
         }
 
         // Verify the Firebase ID Token using Admin SDK
+        console.log(`[Auth] Attempting to verify token of length ${idToken.length}...`);
         const decodedToken = await adminAuth.verifyIdToken(idToken);
+        console.log(`[Auth] Token actively verified for UID: ${decodedToken.uid}`);
+        
         const { uid, email, name: googleName } = decodedToken;
         const displayName = name || googleName || email.split('@')[0];
 
@@ -38,8 +42,19 @@ const handleTokenAuth = async (req, res) => {
         res.json({ success: true, redirectUrl: "/" });
         
     } catch (error) {
-        console.error("Token Verification Error:", error);
-        res.status(401).json({ success: false, error: "Authentication failed. Token invalid or expired." });
+        console.error("[Auth Fatal Error] verifyIdToken failed completely:");
+        console.error("  - Code:", error.code);
+        console.error("  - Message:", error.message);
+        
+        if (error.code === "auth/id-token-expired") {
+            return res.status(401).json({ success: false, error: "Firebase Token has expired. Please log in again." });
+        }
+        if (error.code === "auth/argument-error") {
+            // Usually means firebase-admin isn't initialized correctly or project mismatch
+            return res.status(401).json({ success: false, error: "Vercel Admin Initialization failure." });
+        }
+        
+        res.status(401).json({ success: false, error: `Auth error: ${error.message}` });
     }
 };
 
