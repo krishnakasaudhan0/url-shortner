@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | ShortLink</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+        body {
+            font-family: 'Fredoka One', cursive;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-[#FFF5D1] text-black antialiased">
+    
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div id="toast-error" class="fixed top-24 right-8 z-50 bg-[#FF5555] border-4 border-black text-black px-6 py-4 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)] flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
+            <i class="ri-error-warning-fill text-2xl"></i>
+            <p class="font-normal text-lg"><%= error %></p>
+            <button onclick="document.getElementById('toast-error').remove()" class="ml-4 hover:scale-110 transition-transform outline-none">
+                <i class="ri-close-circle-fill text-2xl"></i>
+            </button>
+        </div>
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        </style>
+        <script>
+            setTimeout(() => {
+                const toast = document.getElementById('toast-error');
+                if(toast) {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
+        </script>
+    <% } %>
+
+    <!-- Navbar -->
+    <nav class="w-full px-4 md:px-8 py-3 md:py-5 bg-[#FFD166] border-b-4 border-black flex justify-between items-center fixed top-0 left-0 z-50">
+        <a href="/" class="text-2xl md:text-3xl tracking-wide text-black drop-shadow-[2px_2px_0_#FFF]">ShortLink</a>
+        <div class="flex items-center gap-2 md:gap-6">
+            <a href="/profile" class="hidden sm:block text-lg md:text-xl text-black hover:text-white hover:drop-shadow-[2px_2px_0_#000] transition-all">Your Links</a>
+            
+            <div class="flex items-center gap-2 md:gap-4 border-l-4 border-black pl-3 md:pl-6 ml-1 md:ml-2">
+                <a href="/login" class="px-3 py-1.5 md:px-5 md:py-2 rounded-xl bg-white border-2 md:border-4 border-black text-black text-sm md:text-lg transition-all shadow-[2px_2px_0_0_#000] md:shadow-[4px_4px_0_0_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1 flex items-center justify-center">Login</a>
+                <a href="/signup" class="px-3 py-1.5 md:px-5 md:py-2 rounded-xl bg-[#06D6A0] border-2 md:border-4 border-black text-black text-sm md:text-lg transition-all shadow-[2px_2px_0_0_#000] md:shadow-[4px_4px_0_0_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1 flex items-center justify-center">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-grow flex items-center justify-center pt-24 md:pt-28 pb-12 px-4 relative overflow-hidden">
+        <!-- Background decorative elements -->
+        <div class="hidden md:block absolute top-20 right-20 w-32 h-32 bg-[#118AB2] rounded-full border-4 border-black -z-10 shadow-[8px_8px_0_0_#000]"></div>
+        <div class="hidden md:block absolute bottom-20 left-20 w-24 h-24 bg-[#FFD166] rounded-lg rotate-12 border-4 border-black -z-10 shadow-[8px_8px_0_0_#000]"></div>
+
+        <div class="w-full max-w-md bg-white shadow-[8px_8px_0_0_#000] md:shadow-[12px_12px_0_0_#000] rounded-[2rem] p-6 md:p-10 border-4 border-black relative z-10 mx-auto">
+            
+            <div class="text-center mb-8">
+                <i class="ri-login-circle-fill text-6xl text-[#EF476F] mb-4 inline-block drop-shadow-[2px_2px_0_#000]"></i>
+                <h1 class="text-4xl tracking-wide text-black mb-2">Welcome Back!</h1>
+                <p class="text-xl text-gray-700">Ready to shrink some links?</p>
+            </div>
+    
+            <form action="/login" method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-xl text-black mb-2">Email</label>
+                    <input 
+                        type="email"
+                        name="email"
+                        required
+                        placeholder="you@example.com"
+                        class="w-full px-5 py-4 rounded-xl bg-[#FFF5D1] border-4 border-black text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#EF476F] focus:bg-white transition-all shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.1)] text-lg"
+                    >
+                </div>
+    
+                <div>
+                    <label class="block text-xl text-black mb-2">Password</label>
+                    <input 
+                        type="password"
+                        name="password"
+                        required
+                        placeholder="••••••••"
+                        class="w-full px-5 py-4 rounded-xl bg-[#FFF5D1] border-4 border-black text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#EF476F] focus:bg-white transition-all shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.1)] text-lg"
+                    >
+                </div>
+    
+                <button 
+                    type="submit"
+                    class="w-full mt-6 py-4 rounded-xl bg-[#EF476F] border-4 border-black text-white text-2xl tracking-wide shadow-[6px_6px_0_0_#000] hover:shadow-none hover:translate-y-[6px] hover:translate-x-[6px] transition-all"
+                >
+                    Login
+                </button>
+            </form>
+    
+            <div class="mt-8 pt-8 border-t-4 border-dashed border-gray-300 text-center">
+                <p class="text-gray-700 mb-6 text-xl">Or hop in with your Google Account</p>
+                <button id="googleLoginBtn" class="w-full py-4 rounded-xl bg-white border-4 border-black text-black hover:bg-[#FFF5D1] text-xl tracking-wide flex items-center justify-center gap-3 transition-all shadow-[6px_6px_0_0_#000] hover:shadow-none hover:translate-y-[6px] hover:translate-x-[6px]">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-8 h-8 pointer-events-none" alt="Google">
+                    Continue with Google
+                </button>
+            </div>
+    
+            <div class="mt-8 text-center">
+                <p class="text-gray-700 text-lg">Don't have an account? <a href="/signup" class="text-[#118AB2] hover:text-[#0c6b8c] underline underline-offset-4 decoration-2">Sign up</a></p>
+            </div>
+    
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+      
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCxi8VQRgRRWVsqcJr63yRvko-kK0WSd4",
+            authDomain: "verilink-6629e.firebaseapp.com",
+            projectId: "verilink-6629e",
+            storageBucket: "verilink-6629e.firebasestorage.app",
+            messagingSenderId: "964601162169",
+            appId: "1:964601162169:web:424aafc7dc39b1177fee68",
+            measurementId: "G-6QWSVNNRKS"
+        };
+      
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        document.getElementById('googleLoginBtn').addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+            .then((result) => {
+                result.user.getIdToken().then(idToken => {
+                    fetch('/auth/google', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: idToken })
+                    })
+                    .then(response => {
+                        if (response.ok) window.location.href = '/';
+                        else console.error('Backend Google Auth Failed');
+                    });
+                });
+            })
+            .catch((error) => console.error("Google Login Error:", error));
+        });
+    </script>
+</body>
+</html>

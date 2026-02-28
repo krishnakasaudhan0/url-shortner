@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>URL Shortener</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+        body {
+            font-family: 'Fredoka One', cursive; /* Fun, thick cartoon font */
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-[#FFF5D1] text-black antialiased">
+    
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div id="toast-error" class="fixed top-24 right-8 z-50 bg-[#FF5555] border-4 border-black text-black px-6 py-4 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)] flex items-center gap-3 animate-[slideIn_0.3s_ease-out]">
+            <i class="ri-error-warning-fill text-2xl"></i>
+            <p class="font-normal text-lg"><%= error %></p>
+            <button onclick="document.getElementById('toast-error').remove()" class="ml-4 hover:scale-110 transition-transform outline-none">
+                <i class="ri-close-circle-fill text-2xl"></i>
+            </button>
+        </div>
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        </style>
+        <script>
+            setTimeout(() => {
+                const toast = document.getElementById('toast-error');
+                if(toast) {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
+        </script>
+    <% } %>
+
+    <!-- Navbar -->
+    <nav class="w-full px-4 md:px-8 py-3 md:py-5 bg-[#FFD166] border-b-4 border-black flex justify-between items-center fixed top-0 left-0 z-50">
+        <h3 class="text-2xl md:text-3xl tracking-wide text-black drop-shadow-[2px_2px_0_#FFF]">ShortLink</h3>
+        <div class="flex items-center gap-2 md:gap-6">
+            <a href="/profile" class="hidden sm:block text-lg md:text-xl text-black hover:text-white hover:drop-shadow-[2px_2px_0_#000] transition-all">Your Links</a>
+            
+            <div class="flex items-center gap-2 md:gap-4 border-l-4 border-black pl-3 md:pl-6 ml-1 md:ml-2">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <a href="/profile" title="Profile" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-[#118AB2] border-2 border-black text-white hover:bg-white hover:text-black hover:scale-110 transition-all shadow-[2px_2px_0_0_#000] md:shadow-[3px_3px_0_0_#000]">
+                        <i class="ri-user-smile-fill text-lg md:text-xl"></i>
+                    </a>
+                    <a href="/logout" title="Logout" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-[#EF476F] border-2 border-black text-white hover:bg-white hover:text-black hover:scale-110 transition-all shadow-[2px_2px_0_0_#000] md:shadow-[3px_3px_0_0_#000]">
+                        <i class="ri-logout-box-r-fill text-lg md:text-xl"></i>
+                    </a>
+                <% } else { %>
+                    <div class="flex items-center gap-2 md:gap-4">
+                        <a href="/login" class="px-3 py-1.5 md:px-5 md:py-2 rounded-xl bg-white border-2 md:border-4 border-black text-black text-sm md:text-lg transition-all shadow-[2px_2px_0_0_#000] md:shadow-[4px_4px_0_0_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1 flex items-center justify-center">Login</a>
+                        <a href="/signup" class="px-3 py-1.5 md:px-5 md:py-2 rounded-xl bg-[#06D6A0] border-2 md:border-4 border-black text-black text-sm md:text-lg transition-all shadow-[2px_2px_0_0_#000] md:shadow-[4px_4px_0_0_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1 flex items-center justify-center">Sign Up</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-grow flex items-center justify-center pt-24 md:pt-28 pb-12 px-4 relative overflow-hidden">
+        <!-- Background decorative elements -->
+        <div class="hidden md:block absolute top-40 left-20 w-32 h-32 bg-[#EF476F] rounded-full border-4 border-black -z-10 shadow-[8px_8px_0_0_#000]"></div>
+        <div class="hidden md:block absolute bottom-20 right-20 w-24 h-24 bg-[#118AB2] rounded-lg rotate-12 border-4 border-black -z-10 shadow-[8px_8px_0_0_#000]"></div>
+
+        <div class="w-full max-w-xl bg-white shadow-[8px_8px_0_0_#000] md:shadow-[12px_12px_0_0_#000] rounded-[2rem] p-6 md:p-10 border-4 border-black relative z-10">
+    
+            <div class="text-center mb-6 md:mb-8">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-[#FFD166] rounded-full border-4 border-black mx-auto mb-4 flex items-center justify-center shadow-[4px_4px_0_0_#000] rotate-[-10deg]">
+                    <i class="ri-links-line text-3xl md:text-4xl text-black"></i>
+                </div>
+                <h1 class="text-3xl md:text-4xl tracking-wide text-black mb-2 drop-shadow-[2px_2px_0_#FFFD166]">Squash a Link!</h1>
+                <p class="text-lg md:text-xl text-gray-700">Make it small and mighty.</p>
+            </div>
+    
+            <!-- Form -->
+            <form action="/api/url" method="POST" class="space-y-4 md:space-y-6">
+                <div>
+                    <label class="block text-lg md:text-xl text-black mb-1 md:mb-2">Destination URL</label>
+                    <input 
+                        type="url"
+                        name="originalUrl"
+                        required
+                        placeholder="https://example.com/some/path"
+                        class="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-[#FFF5D1] border-4 border-black text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#FFD166] focus:bg-white transition-all shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.1)] text-base md:text-lg"
+                    >
+                </div>
+    
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                    <div>
+                        <label class="block text-lg md:text-xl text-black mb-1 md:mb-2">Custom Code <span class="text-xs md:text-sm opacity-80">(Optional)</span></label>
+                        <input 
+                            type="text"
+                            name="customCode"
+                            placeholder="my-link"
+                            class="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-[#FFF5D1] border-4 border-black text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#FFD166] focus:bg-white transition-all shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.1)] text-base md:text-lg"
+                        >
+                    </div>
+        
+                    <div>
+                        <label class="block text-lg md:text-xl text-black mb-1 md:mb-2">Expires In <span class="text-xs md:text-sm opacity-80">(Seconds)</span></label>
+                        <input 
+                            type="number"
+                            name="expiresIn"
+                            placeholder="86400"
+                            class="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-[#FFF5D1] border-4 border-black text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#FFD166] focus:bg-white transition-all shadow-[inset_4px_4px_0_0_rgba(0,0,0,0.1)] text-base md:text-lg"
+                        >
+                    </div>
+                </div>
+    
+                <button 
+                    type="submit"
+                    class="w-full mt-4 md:mt-6 py-3 md:py-4 rounded-xl bg-[#06D6A0] border-4 border-black text-black text-xl md:text-2xl tracking-wide shadow-[4px_4px_0_0_#000] md:shadow-[6px_6px_0_0_#000] hover:shadow-none hover:translate-y-[4px] md:hover:translate-y-[6px] hover:translate-x-[4px] md:hover:translate-x-[6px] transition-all"
+                >
+                    ZAP IT! ⚡
+                </button>
+            </form>
+    
+            <!-- Output field (Conditionally rendered) -->
+            <% if (typeof shortUrl !== 'undefined' && shortUrl) { %>
+                <div class="mt-8 md:mt-10 pt-6 md:pt-8 border-t-4 border-dashed border-black">
+                    <p class="text-lg md:text-xl text-[#06D6A0] mb-3 flex items-center gap-2 drop-shadow-[1px_1px_0_#000]">
+                        <i class="ri-checkbox-circle-fill text-xl md:text-2xl"></i> Boom! New Link Generated:
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center border-4 border-black rounded-xl bg-[#FFF5D1] overflow-hidden group shadow-[4px_4px_0_0_#000]">
+                        <input 
+                            type="text"
+                            value="<%= shortUrl %>"
+                            id="shortUrlOutput"
+                            readonly
+                            class="w-full px-4 md:px-5 py-3 md:py-4 bg-transparent outline-none text-black text-base md:text-xl"
+                        >
+                        <button 
+                            onclick="copyToClipboard(event)"
+                            class="px-4 py-3 md:px-6 md:py-4 bg-[#FFD166] text-black border-t-4 sm:border-t-0 sm:border-l-4 border-black transition-colors flex justify-center items-center gap-2 outline-none hover:bg-[#FFB020] text-base md:text-lg active:bg-[#F77F00]"
+                        >
+                            <i class="ri-clipboard-line text-xl md:text-2xl"></i> <span class="sm:hidden md:inline">Copy</span>
+                        </button>
+                    </div>
+                </div>
+            <% } %>
+    
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(event) {
+            const input = document.getElementById("shortUrlOutput");
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            
+            // Visual feedback
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="ri-check-black-fill text-2xl"></i> Got it!';
+            btn.classList.add('bg-[#06D6A0]');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('bg-[#06D6A0]');
+            }, 2000);
+        }
+    </script>
+
+</body>
+</html>
